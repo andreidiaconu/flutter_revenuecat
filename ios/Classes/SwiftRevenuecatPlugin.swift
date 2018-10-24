@@ -24,45 +24,49 @@ public class SwiftRevenuecatPlugin: NSObject, FlutterPlugin, RCPurchasesDelegate
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as? Dictionary<String, Any>
         switch call.method {
-        case "setupPurchases":
-            setupPurchases(
-                arguments!["apiKey"] as! String,
-                arguments!["appUserId"] as? String,
-                result: result)
-            break
-        case "setIsUsingAnonymousID":
-            setIsUsingAnonymousID(
-                arguments!["isUsingAnonymousID"] as! Bool,
-                result: result)
-            break
-        case "getEntitlements":
-            getEntitlements(result: result)
-            break
-        case "getProductInfo":
-            getProductInfo(
-                arguments!["productIdentifiers"] as! Array<String>,
-                result: result)
-            break
-        case "makePurchase":
-            makePurchase(
-                arguments!["productIdentifier"] as! String,
-                result: result)
-            break
-        case "restoreTransactions":
-            restoreTransactions(result: result)
-            break
-        case "addAttributionData":
-            addAttributionData(
-                arguments!["data"] as! Dictionary<String, Any>,
-                arguments!["network"] as! Int,
-                result: result)
-            break
-        case "getAppUserID":
-            getAppUserID(result: result)
-            break
-        default:
-            result(FlutterMethodNotImplemented)
+            case "setupPurchases":
+                setupPurchases(
+                    arguments!["apiKey"] as! String,
+                    arguments!["appUserId"] as? String,
+                    result: result)
+                break
+            case "setIsUsingAnonymousID":
+                setIsUsingAnonymousID(
+                    arguments!["isUsingAnonymousID"] as! Bool,
+                    result: result)
+                break
+            case "getEntitlements":
+                getEntitlements(result: result)
+                break
+            case "getProductInfo":
+                getProductInfo(
+                    arguments!["productIdentifiers"] as! Array<String>,
+                    result: result)
+                break
+            case "makePurchase":
+                makePurchase(
+                    arguments!["productIdentifier"] as! String,
+                    result: result)
+                break
+            case "restoreTransactions":
+                restoreTransactions(result: result)
+                break
+            case "addAttributionData":
+                addAttributionData(
+                    arguments!["data"] as! Dictionary<String, Any>,
+                    arguments!["network"] as! Int,
+                    result: result)
+                break
+            case "getAppUserID":
+                getAppUserID(result: result)
+                break
+            default:
+                result(FlutterMethodNotImplemented)
         }
+    }
+    
+    public func sendEvent(_ eventName: String, _ params: Dictionary<String, Any>?){
+        self.channel.invokeMethod(eventName, arguments: params)
     }
     
     init(_ channel : FlutterMethodChannel, _ registrar : FlutterPluginRegistrar) {
@@ -73,7 +77,11 @@ public class SwiftRevenuecatPlugin: NSObject, FlutterPlugin, RCPurchasesDelegate
     public func setupPurchases(_ apiKey : String, _ appUserId : String?, result:@escaping FlutterResult){
         self.purchases?.delegate = nil
         self.cachedProducts = Dictionary()
-        self.purchases = RCPurchases.init(apiKey: apiKey, appUserID: appUserId)
+        if (appUserId != nil) {
+            self.purchases = RCPurchases.init(apiKey: apiKey, appUserID: appUserId)
+        } else {
+            self.purchases = RCPurchases.init(apiKey: apiKey)
+        }
         self.purchases!.delegate = self
         result(nil)
     }
@@ -175,28 +183,77 @@ public class SwiftRevenuecatPlugin: NSObject, FlutterPlugin, RCPurchasesDelegate
         return map;
     }
     
+    private func createPurchaserInfoMap(_ purchaserInfo: RCPurchaserInfo) -> [String: Any]{
+        var map = Dictionary<String, Any>()
+        
+        map["activeEntitlements"] = Array(purchaserInfo.activeEntitlements)
+        map["activeSubscriptions"] = Array(purchaserInfo.activeSubscriptions)
+        map["allPurchasedProductIdentifiers"] = Array(purchaserInfo.allPurchasedProductIdentifiers)
+        
+        if #available(iOS 10.0, *) {
+            let formatter = ISO8601DateFormatter()
+            let latest = purchaserInfo.latestExpirationDate
+            map["latestExpirationDate"] = latest != nil ? formatter.string(from: latest!) : nil
+            
+            var allExpirationDates = Dictionary<String, Any>()
+            purchaserInfo.allPurchasedProductIdentifiers.forEach { (identifier) in
+                let date = purchaserInfo.expirationDate(forProductIdentifier: identifier)
+                allExpirationDates[identifier] = date != nil ? formatter.string(from: date!) : nil
+            }
+            map["allExpirationDates"] = allExpirationDates
+            
+            var allEntitlementExpirationDates = Dictionary<String, Any>()
+            purchaserInfo.activeEntitlements.forEach { (entitlement) in
+                let date = purchaserInfo.expirationDate(forEntitlement: entitlement)
+                allEntitlementExpirationDates[entitlement] = date != nil ? formatter.string(from: date!) : nil
+            }
+            map["expirationsForActiveEntitlements"] = allEntitlementExpirationDates
+        }
+        
+        return map
+    }
+    
+    private func errorMap(_ error: Error) -> [String: Any] {
+        return [
+            "error": [
+                "message": error.localizedDescription,
+                "code": error._code,
+                "domain": error._domain
+            ]
+        ]
+    }
+    
     /// Callbacks from the library
     public func purchases(_ purchases: RCPurchases, completedTransaction transaction: SKPaymentTransaction, withUpdatedInfo purchaserInfo: RCPurchaserInfo) {
-        
+        var map = Dictionary<String, Any>()
+        map["productIdentifier"] = transaction.payment.productIdentifier
+        map["purchaserInfo"] = createPurchaserInfoMap(purchaserInfo)
+        sendEvent(SwiftRevenuecatPlugin.PURCHASE_COMPLETED_EVENT, map)
     }
     
     public func purchases(_ purchases: RCPurchases, failedTransaction transaction: SKPaymentTransaction, withReason failureReason: Error) {
-        
+        var map = errorMap(failureReason)
+        map["productIdentifier"] = transaction.payment.productIdentifier
+        sendEvent(SwiftRevenuecatPlugin.PURCHASE_COMPLETED_EVENT, map)
     }
     
     public func purchases(_ purchases: RCPurchases, receivedUpdatedPurchaserInfo purchaserInfo: RCPurchaserInfo) {
-        
+        var map = Dictionary<String, Any>()
+        map["purchaserInfo"] = createPurchaserInfoMap(purchaserInfo)
+        sendEvent(SwiftRevenuecatPlugin.PURCHASER_INFO_UPDATED, map)
     }
     
     public func purchases(_ purchases: RCPurchases, restoredTransactionsWith purchaserInfo: RCPurchaserInfo) {
-        
+        var map = Dictionary<String, Any>()
+        map["purchaserInfo"] = createPurchaserInfoMap(purchaserInfo)
+        sendEvent(SwiftRevenuecatPlugin.TRANSACTIONS_RESTORED, map)
     }
     
     public func purchases(_ purchases: RCPurchases, failedToRestoreTransactionsWithError error: Error) {
-        
+        sendEvent(SwiftRevenuecatPlugin.TRANSACTIONS_RESTORED, errorMap(error));
     }
     
     public func purchases(_ purchases: RCPurchases, failedToUpdatePurchaserInfoWithError error: Error) {
-        
+        sendEvent(SwiftRevenuecatPlugin.PURCHASE_COMPLETED_EVENT, errorMap(error))
     }
 }
