@@ -112,6 +112,7 @@ class Purchases{
 class PurchasesError{
   final String domain;
   final int code;
+  final String message;
   bool get userCancelled =>  userCancelledDomainCodes[code] == domain;
   static const Map<int, String> userCancelledDomainCodes = {
     1: 'Play Billing',
@@ -120,11 +121,12 @@ class PurchasesError{
 
   PurchasesError.fromJson(Map<dynamic, dynamic> map):
         domain = map['domain'],
-        code = map['code'];
+        code = map['code'],
+        message = map['message'];
 
   @override
   String toString() {
-    return 'PurchasesError{domain: $domain, code: $code}';
+    return 'PurchasesError{domain: $domain, code: $code, message: $message}';
   }
 }
 
@@ -179,7 +181,7 @@ class Product{
       introPrice,
       introPriceCycles,
       currencyCode;
-  final int  price;
+  final double  price;
   Product.fromJson(Map<dynamic, dynamic> map):
         identifier = map['identifier'],
         introPricePeriod = map['intro_price_period'],

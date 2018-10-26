@@ -134,7 +134,7 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
     map.put("identifier", detail.getSku());
     map.put("description", detail.getDescription());
     map.put("title", detail.getTitle());
-    map.put("price", detail.getPriceAmountMicros() / 1000000);
+    map.put("price", ((double) detail.getPriceAmountMicros()) / 1000000);
     map.put("price_string", detail.getPrice());
 
     map.put("intro_price", detail.getIntroductoryPriceAmountMicros());
