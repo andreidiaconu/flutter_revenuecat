@@ -1,8 +1,8 @@
 #import "RevenuecatPlugin.h"
-#import <revenuecat/revenuecat-umbrella.h>
+#import <revenuecat/revenuecat-Swift.h>
 
 @implementation RevenuecatPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-    [RevenuecatPlugin registerWithRegistrar:registrar];
+  [SwiftRevenuecatPlugin registerWithRegistrar:registrar];
 }
 @end
