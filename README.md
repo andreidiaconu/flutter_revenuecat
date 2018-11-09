@@ -34,3 +34,6 @@ await Purchases.makePurchase(product.identifier);
 ```
 
 6. RevenueCat will take care of the rest and update your listeners from number 3
+
+# License
+Published under MIT License. [Read it here](https://github.com/andreidiaconu/flutter_revenuecat/blob/master/LICENSE)
