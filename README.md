@@ -2,6 +2,24 @@
 
 This is not an official RevenueCat repo. We use this plugin at [PostMuse](https://try.postmuseapp.com/github) and decided to open source it. We welcome contributions of any kind. This implementation uses the native [Android](https://docs.revenuecat.com/docs/android) and [iOS](https://docs.revenuecat.com/docs/ios) RevenueCat libraries. 
 
+## Install
+
+Plugin is published on [Pub](https://pub.dartlang.org/packages/revenuecat). Add this to your `pubspec.yaml`:
+```
+dependencies:
+  revenuecat: ^0.0.3
+```
+
+Then run
+```
+flutter packages get
+```
+
+Import it in your dart files
+```
+import 'package:revenuecat/revenuecat.dart';
+```
+
 ## How to use
 1. Go over to [RevenueCat](https://www.revenuecat.com) and create an account. [Understand](https://docs.revenuecat.com/docs/entitlements) what Entitlements are and create the ones you need.
 
@@ -12,6 +30,7 @@ await RevenueCat.setup("YOUR_API_KEY_HERE", null);
 If you have user accounts, the second parameter should be the user id. Leaving that `null` makes RevenueCat generate ids for you. [Read more in the docs](https://docs.revenuecat.com/docs/user-ids)
 
 3. Know if the user is paying
+
 This bit is async. You need to listen for changes to the Purchaser Info and find a way to update the app UI to reflect locked/unlocked features.
 ```
 RevenueCat.addPurchaseListener(purchaseListener);
