@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:revenuecat/purchases.dart';
+import 'package:revenuecat/revenuecat.dart';
 
 void main() => runApp(new MyApp());
 
@@ -25,12 +25,12 @@ class _MyAppState extends State<MyApp> {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      await Purchases.setup("YOUR_API_KEY_HERE", null);
-      var entitlements = await Purchases.getEntitlements();
+      await RevenueCat.setup("YOUR_API_KEY_HERE", null);
+      var entitlements = await RevenueCat.getEntitlements();
       print("Entitlements are $entitlements");
-      var products = await Purchases.getProducts(["com.postmuseapp.designer.sub.monthly"]);
+      var products = await RevenueCat.getProducts(["com.postmuseapp.designer.sub.monthly"]);
       print("Products are $products");
-      platformVersion = await Purchases.getAppUserID();
+      platformVersion = await RevenueCat.getAppUserID();
     } catch (e, s) {
       platformVersion = 'Failed with $e $s';
     }

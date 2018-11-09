@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 typedef void PurchaseListener(String productIdentifier, PurchaserInfo purchaserInfo, PurchasesError error);
 typedef void PurchaserListener(PurchaserInfo purchaserInfo, PurchasesError error);
 
-class Purchases{
+class RevenueCat{
   static final Set<PurchaseListener> purchaseListener = Set();
   static final Set<PurchaserListener> purchaserInfoUpdateListener = Set();
   static final Set<PurchaserListener> restoreTransactionsListener = Set();

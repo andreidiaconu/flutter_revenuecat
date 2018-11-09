@@ -1,8 +1,8 @@
 name: revenuecat
 description: RevenueCat plugin for Flutter
 version: 0.0.1
-author:
-homepage:
+author: Andrei Diaconu (PostMuse) <diaconu.andrei.tudor@gmail.com>
+homepage: https://github.com/andreidiaconu/flutter_revenuecat
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
