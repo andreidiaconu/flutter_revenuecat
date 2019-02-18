@@ -1,7 +1,5 @@
 package com.flutterplugin.revenuecat;
 
-import android.support.annotation.Nullable;
-
 import com.android.billingclient.api.SkuDetails;
 import com.revenuecat.purchases.Entitlement;
 import com.revenuecat.purchases.Offering;
@@ -9,6 +7,8 @@ import com.revenuecat.purchases.PurchaserInfo;
 import com.revenuecat.purchases.Purchases;
 import com.revenuecat.purchases.util.Iso8601Utils;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -105,7 +105,7 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
     if (Purchases.getSharedInstance() != null) {
       Purchases.getSharedInstance().close();
     }
-    Purchases.Builder builder = new Purchases.Builder(reactContext, apiKey);
+    Purchases.Builder builder = new Purchases.Builder(registrar.context(), apiKey);
     if (appUserID != null) {
       builder.appUserID(appUserID);
     }
@@ -117,7 +117,7 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
 
   public void setAllowSharingAppStoreAccount(boolean allowSharingAppStoreAccount, Result result) {
     checkPurchases();
-    Purchases.getSharedInstance().allowSharingPlayStoreAccount = allowSharingAppStoreAccount;
+    Purchases.getSharedInstance().setAllowSharingPlayStoreAccount(allowSharingAppStoreAccount);
     result.success(null);
   }
 
@@ -125,7 +125,15 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
     checkPurchases();
     try {
       JSONObject object = convertMapToJson(data);
-      Purchases.getSharedInstance().addAttributionData(object, network);
+      Purchases.AttributionNetwork attributionNetwork = null;
+      if (network == Purchases.AttributionNetwork.ADJUST.getServerValue()) {
+        attributionNetwork = Purchases.AttributionNetwork.ADJUST;
+      } else if (network == Purchases.AttributionNetwork.BRANCH.getServerValue()) {
+        attributionNetwork = Purchases.AttributionNetwork.BRANCH;
+      } else if (network == Purchases.AttributionNetwork.APPSFLYER.getServerValue()) {
+        attributionNetwork = Purchases.AttributionNetwork.APPSFLYER;
+      }
+      Purchases.getSharedInstance().addAttributionData(object, attributionNetwork);
       result.success(null);
     } catch (JSONException e) {
       result.error("JSON-PARSE","Error parsing attribution date to JSON" + e.getLocalizedMessage(), null);
@@ -155,6 +163,7 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
     checkPurchases();
 
     Purchases.getSharedInstance().getEntitlements(new Purchases.GetEntitlementsHandler() {
+
       @Override
       public void onReceiveEntitlements(Map<String, Entitlement> entitlementMap) {
         try {
@@ -186,7 +195,7 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
       }
 
       @Override
-      public void onReceiveEntitlementsError(int domain, int code, String message) {
+      public void onReceiveEntitlementsError(@NotNull Purchases.ErrorDomains errorDomains, int code, @NotNull String message) {
         result.error("ERROR_FETCHING_ENTITLEMENTS", message, null);
       }
     });
@@ -239,12 +248,17 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
   }
 
   @Override
-  public void onFailedPurchase(int domain, int code, String message) {
+  public void onFailedPurchase(@NotNull Purchases.ErrorDomains domain, int code, @Nullable String message) {
     Map<String, Object> map = new HashMap<>();
 
     map.put("error", errorMap(domain, code, message));
 
     sendEvent(PURCHASE_COMPLETED_EVENT, map);
+  }
+
+  @Override
+  public void onRestoreTransactionsFailed(@NotNull Purchases.ErrorDomains domain, int code, @Nullable String message) {
+    sendEvent(TRANSACTIONS_RESTORED, errorMap(domain, code, message));
   }
 
   @Override
@@ -262,11 +276,6 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
     map.put("purchaserInfo", createPurchaserInfoMap(purchaserInfo));
 
     sendEvent(TRANSACTIONS_RESTORED, map);
-  }
-
-  @Override
-  public void onRestoreTransactionsFailed(int domain, int code, String reason) {
-    sendEvent(TRANSACTIONS_RESTORED, errorMap(domain, code, reason));
   }
 
   private static JSONObject convertMapToJson(Map<String, Object> source) throws JSONException {
@@ -339,15 +348,15 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
     return map;
   }
 
-  private Map<String, Object> errorMap(int domain, int code, String message) {
+  private Map<String, Object> errorMap(Purchases.ErrorDomains domain, int code, String message) {
     Map<String, Object> errorMap = new HashMap<>();
     String domainString;
 
     switch (domain) {
-      case Purchases.ErrorDomains.REVENUECAT_BACKEND:
+      case REVENUECAT_BACKEND:
         domainString = "RevenueCat Backend";
         break;
-      case Purchases.ErrorDomains.PLAY_BILLING:
+      case PLAY_BILLING:
         domainString = "Play Billing";
         break;
       default:
