@@ -9,7 +9,7 @@ This library uses native RevenueCat libraries 1.x.x, which means it does not yet
 Plugin is published on [Pub](https://pub.dartlang.org/packages/revenuecat). Add this to your `pubspec.yaml`:
 ```
 dependencies:
-  revenuecat: ^1.0.2
+  revenuecat: ^1.0.3
 ```
 
 Then run

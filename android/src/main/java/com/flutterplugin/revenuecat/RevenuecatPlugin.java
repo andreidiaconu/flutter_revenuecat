@@ -32,7 +32,7 @@ import io.flutter.view.FlutterNativeView;
 public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesListener{
   /** Plugin registration. */
   public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "channel:com.flutterplugin.revenuecat/Purchases.getSharedInstance()");
+    final MethodChannel channel = new MethodChannel(registrar.messenger(), "channel:com.flutterplugin.revenuecat/purchases");
     RevenuecatPlugin plugin = new RevenuecatPlugin(registrar, channel);
     channel.setMethodCallHandler(plugin);
   }
