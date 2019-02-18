@@ -32,7 +32,7 @@ import io.flutter.view.FlutterNativeView;
 public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesListener{
   /** Plugin registration. */
   public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "channel:com.flutterplugin.revenuecat/purchases");
+    final MethodChannel channel = new MethodChannel(registrar.messenger(), "channel:com.flutterplugin.revenuecat/Purchases.getSharedInstance()");
     RevenuecatPlugin plugin = new RevenuecatPlugin(registrar, channel);
     channel.setMethodCallHandler(plugin);
   }
@@ -43,8 +43,8 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
       if (call.method.equals("setupPurchases")) {
         //{'apiKey' : apiKey, 'appUserId' : appUserId}
         setupPurchases((String) call.argument("apiKey"), (String) call.argument("appUserId"), result);
-      } else if (call.method.equals("setIsUsingAnonymousID")) {
-        setIsUsingAnonymousID((Boolean) call.argument("isUsingAnonymousID"), result);
+      } else if (call.method.equals("setAllowSharingAppStoreAccount")) {
+        setAllowSharingAppStoreAccount((Boolean) call.argument("allowSharingAppStoreAccount"), result);
       } else if (call.method.equals("getEntitlements")) {
         getEntitlements(result);
       } else if (call.method.equals("getProductInfo")) {
@@ -76,7 +76,6 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
 
   private final Registrar registrar;
   private final MethodChannel channel;
-  private Purchases purchases;
 
   public RevenuecatPlugin(Registrar registrar, MethodChannel channel) {
     this.registrar = registrar;
@@ -91,29 +90,34 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
   }
 
   private void checkPurchases() {
-    if (purchases == null) {
+    if (Purchases.getSharedInstance() == null) {
       throw new RuntimeException("You must call setupPurchases first");
     }
   }
 
   public void onDestroy() {
-    if (purchases != null) {
-      purchases.close();
-      purchases = null;
+    if (Purchases.getSharedInstance() != null) {
+      Purchases.getSharedInstance().close();
     }
   }
 
   public void setupPurchases(String apiKey, String appUserID, final Result result) {
-    if (purchases != null) {
-      purchases.close();
+    if (Purchases.getSharedInstance() != null) {
+      Purchases.getSharedInstance().close();
     }
-    purchases = new Purchases.Builder(registrar.context(), apiKey, this).appUserID(appUserID).build();
+    Purchases.Builder builder = new Purchases.Builder(reactContext, apiKey);
+    if (appUserID != null) {
+      builder.appUserID(appUserID);
+    }
+    Purchases purchases = builder.build();
+    purchases.setListener(this);
+    Purchases.setSharedInstance(purchases);
     result.success(null);
   }
 
-  public void setIsUsingAnonymousID(boolean isUsingAnonymousID, Result result) {
+  public void setAllowSharingAppStoreAccount(boolean allowSharingAppStoreAccount, Result result) {
     checkPurchases();
-    purchases.setIsUsingAnonymousID(isUsingAnonymousID);
+    Purchases.getSharedInstance().allowSharingPlayStoreAccount = allowSharingAppStoreAccount;
     result.success(null);
   }
 
@@ -121,7 +125,7 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
     checkPurchases();
     try {
       JSONObject object = convertMapToJson(data);
-      purchases.addAttributionData(object, network);
+      Purchases.getSharedInstance().addAttributionData(object, network);
       result.success(null);
     } catch (JSONException e) {
       result.error("JSON-PARSE","Error parsing attribution date to JSON" + e.getLocalizedMessage(), null);
@@ -150,7 +154,7 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
   public void getEntitlements(final Result result) {
     checkPurchases();
 
-    purchases.getEntitlements(new Purchases.GetEntitlementsHandler() {
+    Purchases.getSharedInstance().getEntitlements(new Purchases.GetEntitlementsHandler() {
       @Override
       public void onReceiveEntitlements(Map<String, Entitlement> entitlementMap) {
         try {
@@ -204,25 +208,25 @@ public class RevenuecatPlugin implements MethodCallHandler, Purchases.PurchasesL
     };
 
     if (type.toLowerCase().equals("subs")) {
-      purchases.getSubscriptionSkus(productIDs, handler);
+      Purchases.getSharedInstance().getSubscriptionSkus(productIDs, handler);
     } else {
-      purchases.getNonSubscriptionSkus(productIDs, handler);
+      Purchases.getSharedInstance().getNonSubscriptionSkus(productIDs, handler);
     }
   }
 
   public void makePurchase(String productIdentifier, ArrayList<String> oldSkus, String type, Result result) {
     checkPurchases();
-    purchases.makePurchase(registrar.activity(), productIdentifier, type, oldSkus);
+    Purchases.getSharedInstance().makePurchase(registrar.activity(), productIdentifier, type, oldSkus);
     result.success(null);
   }
 
   public void getAppUserID(final Result result) {
-    result.success(purchases.getAppUserID());
+    result.success(Purchases.getSharedInstance().getAppUserID());
   }
 
   public void restoreTransactions(Result result) {
     checkPurchases();
-    purchases.restorePurchasesForPlayStoreAccount();
+    Purchases.getSharedInstance().restorePurchasesForPlayStoreAccount();
     result.success(null);
   }
 
