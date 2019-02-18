@@ -34,6 +34,6 @@ android {
 }
 
 dependencies {
-    compile 'com.revenuecat.purchases:purchases:1.3.6'
+    compile 'com.revenuecat.purchases:purchases:1.4.2'
     compile 'com.android.billingclient:billing:1.1'
 }

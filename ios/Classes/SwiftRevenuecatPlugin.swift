@@ -12,7 +12,6 @@ public class SwiftRevenuecatPlugin: NSObject, FlutterPlugin, RCPurchasesDelegate
     
     let channel: FlutterMethodChannel;
     let registrar: FlutterPluginRegistrar;
-    var purchases: RCPurchases?
     private var cachedProducts: Dictionary<String, SKProduct> = Dictionary();
     
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -30,9 +29,9 @@ public class SwiftRevenuecatPlugin: NSObject, FlutterPlugin, RCPurchasesDelegate
                     arguments!["appUserId"] as? String,
                     result: result)
                 break
-            case "setIsUsingAnonymousID":
-                setIsUsingAnonymousID(
-                    arguments!["isUsingAnonymousID"] as! Bool,
+            case "setAllowSharingAppStoreAccount":
+                setAllowSharingAppStoreAccount(
+                    arguments!["allowSharingAppStoreAccount"] as! Bool,
                     result: result)
                 break
             case "getEntitlements":
@@ -75,26 +74,26 @@ public class SwiftRevenuecatPlugin: NSObject, FlutterPlugin, RCPurchasesDelegate
     }
     
     public func setupPurchases(_ apiKey : String, _ appUserId : String?, result:@escaping FlutterResult){
-        self.purchases?.delegate = nil
+        RCPurchases.shared().delegate = nil
         self.cachedProducts = Dictionary()
         if (appUserId != nil) {
-            self.purchases = RCPurchases.init(apiKey: apiKey, appUserID: appUserId)
+            RCPurchases.configure(withAPIKey: apiKey, appUserID: appUserId)
         } else {
-            self.purchases = RCPurchases.init(apiKey: apiKey)
+            RCPurchases.configure(withAPIKey: apiKey)
         }
-        self.purchases!.delegate = self
+        RCPurchases.shared().delegate = self
         result(nil)
     }
     
-    public func setIsUsingAnonymousID(_ isUsingAnonymousID : Bool, result:@escaping FlutterResult) {
+    public func setAllowSharingAppStoreAccount(_ allowSharingAppStoreAccount : Bool, result:@escaping FlutterResult) {
         checkPurchases()
-        purchases?.isUsingAnonymousID = isUsingAnonymousID
+        RCPurchases.shared().allowSharingAppStoreAccount = allowSharingAppStoreAccount
         result(nil)
     }
     
     public func getEntitlements(result:@escaping FlutterResult){
         checkPurchases()
-        self.purchases!.entitlements({ (entitlementMap : [String : RCEntitlement]?) in
+        RCPurchases.shared().entitlements({ (entitlementMap : [String : RCEntitlement]?) in
             var resultMap = Dictionary<String, Any>()
             entitlementMap?.forEach({ (entitlementSet) in
                 let (entitlementId, entitlement) = entitlementSet
@@ -116,7 +115,7 @@ public class SwiftRevenuecatPlugin: NSObject, FlutterPlugin, RCPurchasesDelegate
     
     public func getProductInfo(_ productIds : Array<String>, result:@escaping FlutterResult) {
         checkPurchases()
-        self.purchases!.products(withIdentifiers: productIds) { (products: [SKProduct]) in
+        RCPurchases.shared().products(withIdentifiers: productIds) { (products: [SKProduct]) in
             var resultArray = Array<Any>()
             products.forEach({ (product:SKProduct) in
                 resultArray.append(self.mapForOfferingDetails(product))
@@ -132,30 +131,30 @@ public class SwiftRevenuecatPlugin: NSObject, FlutterPlugin, RCPurchasesDelegate
         if (product == nil) {
             result(FlutterError.init(code: "Purchase not found", message: "Purchases cannot find product. Did you call getEntitlements or getProductInfo first?", details: nil))
         } else {
-            self.purchases!.makePurchase(product!)
+            RCPurchases.shared().makePurchase(product!)
             result(nil)
         }
     }
     
     public func restoreTransactions(result:@escaping FlutterResult) {
         checkPurchases()
-        self.purchases!.restoreTransactionsForAppStoreAccount()
+        RCPurchases.shared().restoreTransactionsForAppStoreAccount()
         result(nil)
     }
     
     public func addAttributionData(_ data : Dictionary<String, Any>, _ network : Int, result:@escaping FlutterResult) {
         checkPurchases()
-        self.purchases!.addAttributionData(data, from: RCAttributionNetwork.init(rawValue: network)!)
+        RCPurchases.shared().addAttributionData(data, from: RCAttributionNetwork.init(rawValue: network)!)
         result(nil)
     }
     
     public func getAppUserID(result:@escaping FlutterResult){
         checkPurchases()
-        result(self.purchases!.appUserID)
+        result(RCPurchases.shared().appUserID)
     }
     
     private func checkPurchases(){
-        assert(self.purchases != nil, "You must call setupPurchases first")
+        assert(RCPurchases.shared() != nil, "You must call setupPurchases first")
     }
     
     private func mapForOfferingDetails(_ detail: SKProduct) -> Dictionary<String, Any> {

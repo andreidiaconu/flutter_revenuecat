@@ -1,6 +1,6 @@
 name: revenuecat
-description: RevenueCat plugin for Flutter
-version: 0.0.3
+description: Mobile Subscriptions Don't Have To Be Hard. RevenueCat plugin for Flutter. This plugin uses the native Android and iOS RevenueCat libraries.
+version: 1.0.1
 author: Andrei Diaconu (PostMuse) <diaconu.andrei.tudor@gmail.com>
 homepage: https://github.com/andreidiaconu/flutter_revenuecat
 

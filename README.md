@@ -1,13 +1,15 @@
 # RevenueCat Flutter plugin
 
-This is not an official RevenueCat repo. We use this plugin at [PostMuse](https://try.postmuseapp.com/github) and decided to open source it. We welcome contributions of any kind. This implementation uses the native [Android](https://docs.revenuecat.com/docs/android) and [iOS](https://docs.revenuecat.com/docs/ios) RevenueCat libraries. 
+This is not an official RevenueCat repo. We use this plugin at [PostMuse](https://try.postmuseapp.com/github) and decided to open source it. We welcome contributions of any kind. This implementation uses the native [Android](https://docs.revenuecat.com/docs/android) and [iOS](https://docs.revenuecat.com/docs/ios) RevenueCat libraries.
+
+This library uses native RevenueCat libraries 1.x.x, which means it does not yet use iOS and Android version 2.x.x - We are planning to update the library, but we also welcome pull requests if you want to be helpful.   
 
 ## Install
 
 Plugin is published on [Pub](https://pub.dartlang.org/packages/revenuecat). Add this to your `pubspec.yaml`:
 ```
 dependencies:
-  revenuecat: ^0.0.3
+  revenuecat: ^1.0.1
 ```
 
 Then run
