@@ -9,7 +9,7 @@ This library uses native RevenueCat libraries 1.x.x, which means it does not yet
 Plugin is published on [Pub](https://pub.dartlang.org/packages/revenuecat). Add this to your `pubspec.yaml`:
 ```
 dependencies:
-  revenuecat: ^1.0.3
+  revenuecat: ^1.0.4
 ```
 
 Then run
@@ -41,13 +41,13 @@ RevenueCat.addRestoreTransactionListener(purchaserListener);
 ```
 We recommend you do this at the highest level in your app and find a way to propagate this info. We use an [InheritedWidget](https://docs.flutter.io/flutter/widgets/InheritedWidget-class.html) to keep this state and listen for changes in another "blocker" widget that updates when the InheritedWidget changes state. The "blocker" widget blocks access to whatever is below it and shows a "PRO" badge on top. This is approach is simplistic but effective, and works for us. 
 
-Bottom line is you need to listen for state changes from RevenueCat. Listener structure is [found here](https://github.com/andreidiaconu/flutter_revenuecat/blob/c572129f330a193b873fc93ab8d1f0f177ba95af/lib/revenuecat.dart#L6).
+Bottom line is you need to listen for state changes from RevenueCat. Listener structure is [found here](https://github.com/andreidiaconu/flutter_revenuecat/blob/master/lib/revenuecat.dart#L6).
 
 4. Get the Entitlements
 ```
 var entitlements = await RevenueCat.getEntitlements();
 ```
-Response is a Map with Entitlements, which then contain Offerings, which contain Products. Products contain price, period, introductory price, etc. It's best to [look at the models directly](https://github.com/andreidiaconu/flutter_revenuecat/blob/c572129f330a193b873fc93ab8d1f0f177ba95af/lib/revenuecat.dart#L163) to understand more.
+Response is a Map with Entitlements, which then contain Offerings, which contain Products. Products contain price, period, introductory price, etc. It's best to [look at the models directly](https://github.com/andreidiaconu/flutter_revenuecat/blob/master/lib/revenuecat.dart#L157) to understand more.
 
 5. Display Products, start payment flow
 ```
