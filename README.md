@@ -1,8 +1,9 @@
-# RevenueCat Flutter plugin
+# Deprecated - Please use [official lib](https://pub.dev/packages/purchases_flutter)
 
-This is not an official RevenueCat repo. We use this plugin at [PostMuse](https://try.postmuseapp.com/github) and decided to open source it. We welcome contributions of any kind. This implementation uses the native [Android](https://docs.revenuecat.com/docs/android) and [iOS](https://docs.revenuecat.com/docs/ios) RevenueCat libraries.
+This is not an official RevenueCat library. When this was created, RevenueCat did not have official support for Flutter yet. 
+The good news is that they do support Flutter now. Please use the [official lib](https://pub.dev/packages/purchases_flutter) instead.
 
-This library uses native RevenueCat libraries 1.x.x, which means it does not yet use iOS and Android version 2.x.x - We are planning to update the library, but we also welcome pull requests if you want to be helpful.   
+I have no plans of maintaining this project.
 
 ## Install
 
