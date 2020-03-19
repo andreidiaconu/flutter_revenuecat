@@ -1,7 +1,10 @@
+## 1.0.5
+
+* Deprecated this library in favour of [Official RevenueCat lib](https://pub.dev/packages/purchases_flutter)
+
 ## 1.0.3
 
 * Fixed Android problems
-
 
 ## 1.0.2
 

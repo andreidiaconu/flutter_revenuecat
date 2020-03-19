@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 /// Listener for purchase events or errors (eg. if the user makes a purchase or cancels a purchase flow)
+@Deprecated("Please use `purchases_flutter` library instead of this")
 typedef void PurchaseListener(String productIdentifier, PurchaserInfo purchaserInfo, PurchasesError error);
 
 /// Listener for puchasER changes (eg. if the user changes from non-paying to paying)
+@Deprecated("Please use `purchases_flutter` library instead of this")
 typedef void PurchaserListener(PurchaserInfo purchaserInfo, PurchasesError error);
 
+@Deprecated("Please use `purchases_flutter` library instead of this")
 class RevenueCat{
   static final Set<PurchaseListener> _purchaseListener = Set();
   static final Set<PurchaserListener> _purchaserInfoUpdateListener = Set();
@@ -53,6 +56,7 @@ class RevenueCat{
     });
 
   /// Setup your Purchases instance
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static Future<void> setup(String apiKey, String appUserId) async {
     await _channel.invokeMethod('setupPurchases', {'apiKey' : apiKey, 'appUserId' : appUserId});
   }
@@ -60,74 +64,88 @@ class RevenueCat{
   /// Set this to true if you are passing in an appUserID but it is anonymous, this is true by default if you didn't pass an appUserID
   /// If a user tries to purchase a product that is active on the current app store account, we will treat it as a restore and alias
   /// the new ID with the previous id.
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static Future<void> setAllowSharingStoreAccount(bool allowSharingStoreAccount) async {
     await _channel.invokeMethod('setAllowSharingStoreAccount', {'allowSharingStoreAccount' : allowSharingStoreAccount});
   }
 
   /// Start listening for purchase events and changes
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static void addPurchaseListener(PurchaseListener listener) async {
     _purchaseListener.add(listener);
   }
 
   /// Stop listening for purchase events
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static void removePurchaseListener(PurchaseListener listener) async {
     _purchaseListener.remove(listener);
   }
 
   /// Start listening for purchasER changes. You should update the UI with the latest instance of your purchaser (eg. paying / non-paying)
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static void addPurchaserInfoUpdateListener(PurchaserListener listener) async {
     _purchaserInfoUpdateListener.add(listener);
   }
 
   /// Stop listenning for purchasER changes
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static void removePurchaserInfoUpdateListener(PurchaserListener listener) async {
     _purchaserInfoUpdateListener.remove(listener);
   }
 
   /// Same as addPurchaseListener, but this is specific for restore operations
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static void addRestoreTransactionListener(PurchaserListener listener) async {
     _restoreTransactionsListener.add(listener);
   }
 
   /// Stop listening for restore operations
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static void removeRestoreTransactionListener(PurchaserListener listener) async {
     _restoreTransactionsListener.remove(listener);
   }
 
   /// Get the entitlements from RevenueCat servers. An entitlement represents features or content that a user is "entitled" to. Entitlements can be unlocked by having an active subscription or making a one-time purchase.
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static Future<Map<String, Entitlement>> getEntitlements() async {
     Map<dynamic, dynamic> result = await _channel.invokeMethod('getEntitlements');
     return result.map((key, jsonValue) => MapEntry<String, Entitlement>(key, Entitlement.fromJson(jsonValue)));
   }
 
   /// Get all products. Products are a 1-to-1 mapping with your Apple or Google in-app purchase products.
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static Future<List<Product>> getProducts(List<String> productIdentifiers, {type = "subs"}) async {
     List<dynamic> result = await _channel.invokeMethod('getProductInfo', {'productIdentifiers' : productIdentifiers, 'type' : type});
     return result.map((item)=>Product.fromJson(item)).toList();
   }
 
   /// Start the purchase flow for a certain product. After the purchase is made, listeners should kick in.
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static Future<void> makePurchase(String productIdentifier, {List<String> oldSKUs = const [], String type= "subs"}) async {
     await _channel.invokeMethod('makePurchase', {'productIdentifier' : productIdentifier, 'oldSKUs' : oldSKUs, 'type' : type});
   }
 
   /// Start the restore procedures. This does not show any UI in most cases, but the listener should kick in if there is something to restore.
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static Future<void> restoreTransactions() async {
     await _channel.invokeMethod('restoreTransactions');
   }
 
   /// Get the unique id used by Purchases or the id assigned during setup. This is what we identify our purchaser by.
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static Future<String> getAppUserID() async {
     return await _channel.invokeMethod('getAppUserID') as String;
   }
 
   /// Add attribution data, which is used to know how much each acquisition source contributes to revenue
+  @Deprecated("Please use `purchases_flutter` library instead of this")
   static Future<void> addAttributionData(Map<String, Object> data, int network) async {
     await _channel.invokeMethod('addAttributionData', {'data' : data, 'network' : network});
   }
 }
 
 /// Produced when there was an error either in RevenueCat, Android or iOS
+@Deprecated("Please use `purchases_flutter` library instead of this")
 class PurchasesError{
   /// Where did the error occur. Also used to know if the error was a cancellation
   final String domain;
@@ -154,6 +172,7 @@ class PurchasesError{
 }
 
 /// Purchaser information, used mainly to know if a user is paying or not
+@Deprecated("Please use `purchases_flutter` library instead of this")
 class PurchaserInfo{
   /// If the user is entitled to something, it will be in this list. For most apps with subscriptions, this will be empty for non-paying users and contain one entitlement for paying ones
   final List<String> activeEntitlements;
@@ -193,6 +212,7 @@ class PurchaserInfo{
 }
 
 /// An entitlement represents features or content that a user is "entitled" to. Entitlements can be unlocked by having an active subscription or making a one-time purchase.
+@Deprecated("Please use `purchases_flutter` library instead of this")
 class Entitlement{
   /// In order to be "entitled" to this entitlement, the user can purchase one of the offerings. This is an abstraction above "products" and can be configured in RevenueCat
   final Map<String, Product> offerings;
@@ -207,6 +227,7 @@ class Entitlement{
 }
 
 /// Products are a 1-to-1 mapping with your Apple or Google in-app purchase products.
+@Deprecated("Please use `purchases_flutter` library instead of this")
 class Product{
   final String identifier,
       introPricePeriod,
